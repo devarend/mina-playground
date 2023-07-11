@@ -1,0 +1,18 @@
+diff --git a/node_modules/@webcontainer/api/dist/util.js b/node_modules/@webcontainer/api/dist/util.js
+index 49fbef0..ad68fbc 100644
+--- a/node_modules/@webcontainer/api/dist/util.js
++++ b/node_modules/@webcontainer/api/dist/util.js
+@@ -9,11 +9,11 @@ export function formatFileSystemTree(tree) {
+             const contents = entry.file.contents;
+             const stringContents = typeof contents === 'string' ? contents : binaryString(contents);
+             const binary = typeof contents === 'string' ? {} : { b: true };
+-            newTree.d[name] = { f: { c: stringContents, ...binary } };
++            newTree.d[name.replace(/\*/g, ".")] = { f: { c: stringContents, ...binary } };
+             continue;
+         }
+         const newEntry = formatFileSystemTree(entry.directory);
+-        newTree.d[name] = newEntry;
++        newTree.d[name.replace(/\*/g, ".")] = newEntry;
+     }
+     return newTree;
+ }

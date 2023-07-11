@@ -51,10 +51,10 @@ const CodeEditor: FC<CodeEditorProps> = ({ code, setCodeChange }) => {
 };
 
 const editorOptions = {
-  fontSize: 14,
+  fontSize: 12,
   minimap: { enabled: false },
   formatOnPaste: true,
-  lineHeight: 24.5,
+  lineHeight: 20,
   automaticLayout: true,
 };
 

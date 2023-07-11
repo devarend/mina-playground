@@ -1,89 +1,187 @@
 import { FC, useState } from "react";
 import Tree from "@/components/file-explorer/Tree";
 import { DirectoryNode, FileNode } from "@webcontainer/api";
-import { FileSystemType } from "@/types";
-
-const DirectoryIcon = () => (
-  <svg
-    height={12}
-    width={12}
-    className={"mr-1"}
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 512 512"
-  >
-    <path d="M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L243.2 57.6C231.1 41.5 212.1 32 192 32H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64z" />
-  </svg>
-);
-
-const FileIcon = () => (
-  <svg
-    height={12}
-    width={12}
-    className="mr-1"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 384 512"
-  >
-    <path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z" />
-  </svg>
-);
+import {
+  FileSystemAction,
+  FileSystemOnChangePayload,
+  FileSystemPayload,
+  FileSystemType,
+} from "@/types";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  DirectoryIcon,
+  FileIcon,
+} from "@/icons/FileSystemIcons";
+import {
+  CreateDirectoryActionIcon,
+  CreateFileActionIcon,
+  DeleteActionIcon,
+  RenameActionIcon,
+} from "@/icons/FileSystemActionIcons";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import {
+  selectChangedFields,
+  selectCurrentDirectory,
+} from "@/features/fileTree/fileTreeSlice";
 
 const TreeNode: FC<TreeNodeProps> = ({
   node,
   onBlur,
+  onChange,
   onClick,
-  setCurrentDirectory,
   directory,
-  currentDirectory,
 }) => {
   const [key, value] = node;
-  const dir = directory ? `${directory}/${key}` : `${key}`;
-  const [inputValue, setInputValue] = useState("");
+  const currentDirectory = useAppSelector(selectCurrentDirectory);
+  const changedFields = useAppSelector(selectChangedFields);
+
+  const path = directory.path ? `${directory.path}/${key}` : `${key}`;
+  const fileName = key.replace(/\*/g, ".");
+  const [inputValue, setInputValue] = useState(fileName);
+  const [isEditing, setIsEditing] = useState(false);
   const [showChildren, setShowChildren] = useState(
-    currentDirectory.startsWith(dir)
+    currentDirectory.path.startsWith(path)
   );
+  const inputFileName = inputValue.replace(/\./g, "*");
   const isDirectory = "directory" in value;
-  const isSelected = currentDirectory && dir === currentDirectory;
-  const isSelectedStyle = isSelected ? "bg-blue-100" : "";
+  const isSelected = currentDirectory && path === currentDirectory.path;
+  const isSelectedStyle = isSelected ? "bg-gray-200" : "";
+  const webcontainer = isDirectory
+    ? `${key || inputFileName}.directory`
+    : `${key || inputFileName}.file.contents`;
+  const webcontainerPath = directory.webcontainerPath
+    ? `${directory.webcontainerPath}.${webcontainer}`
+    : webcontainer;
+
   const handleClick = () => {
-    setCurrentDirectory(dir);
     if (!isDirectory) {
       const code = (value as FileNode).file.contents;
-      onClick(code as string, dir);
+      onClick(code as string, { path, webcontainerPath });
+      return;
     }
     setShowChildren(!showChildren);
   };
+
+  const showChevronIcon =
+    isDirectory && (showChildren ? <ChevronDownIcon /> : <ChevronRightIcon />);
+  const icon = isDirectory ? <DirectoryIcon /> : <FileIcon />;
+
+  const changedField = changedFields[webcontainerPath];
+  const isChanged = changedField && !changedField.saved;
 
   return (
     <>
       <div
         onClick={handleClick}
-        className={`flex p-2 flex-row items-center mb-2 cursor-pointer ${isSelectedStyle}`}
+        className={`group new-file hover:bg-gray-200 flex flex-row items-center mb-1 cursor-pointer ${isSelectedStyle}`}
       >
-        {isDirectory ? <DirectoryIcon /> : <FileIcon />}
-        {key === "" ? (
-          <input
-            autoFocus
-            value={inputValue}
-            onChange={(event) => setInputValue(event.target.value)}
-            onBlur={() =>
-              onBlur(inputValue, isDirectory ? "directory" : "file")
-            }
-            className="pl-2 border border-gray-300 rounded-md bg-gray-50"
-          />
-        ) : (
-          <span>{key}</span>
+        <div className="flex flex-1 flex-row items-center">
+          {showChevronIcon}
+          {icon}
+          {key === "" || isEditing ? (
+            <input
+              autoFocus
+              onFocus={(e) => {
+                e.target.setSelectionRange(0, e.target.value.lastIndexOf("."));
+              }}
+              onKeyPress={(event) => {
+                if (event.key !== "Enter") return;
+                if (key.replace(/\*/g, ".") === inputValue) {
+                  setIsEditing(false);
+                  setShowChildren(false);
+                  return;
+                }
+                onBlur(isEditing ? "rename" : "create", {
+                  path: directory.webcontainerPath,
+                  fullPath: webcontainerPath,
+                  key,
+                  value: inputFileName,
+                });
+                setIsEditing(false);
+                setShowChildren(false);
+              }}
+              value={inputValue}
+              onChange={(event) => setInputValue(event.target.value)}
+              onBlur={() => {
+                if (key.replace(/\*/g, ".") === inputValue) {
+                  setIsEditing(false);
+                  setShowChildren(false);
+                  return;
+                }
+                onBlur(isEditing ? "rename" : "create", {
+                  path: directory.webcontainerPath,
+                  fullPath: webcontainerPath,
+                  key,
+                  value: inputFileName,
+                });
+                setIsEditing(false);
+                setShowChildren(false);
+              }}
+              className="pl-2 border border-gray-300 rounded-md bg-gray-50"
+            />
+          ) : (
+            <span className="text-sm">{fileName}</span>
+          )}
+          {isChanged && (
+            <svg width="16" height="16" fill="black" aria-hidden="true">
+              <path d="M4 12L12 4M12 12L4 4" />
+              <circle cx="8" cy="8" r="4" />
+            </svg>
+          )}
+        </div>
+        {key !== "" && !isEditing && (
+          <div className="hidden group-hover:block">
+            <div className="flex flex-row gap-1">
+              {isDirectory && (
+                <>
+                  <CreateFileActionIcon
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowChildren(true);
+                      onChange("create", "file", { path: webcontainerPath });
+                    }}
+                  />
+                  <CreateDirectoryActionIcon
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setShowChildren(true);
+                      onChange("create", "directory", {
+                        path: webcontainerPath,
+                      });
+                    }}
+                  />
+                </>
+              )}
+              <RenameActionIcon
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setInputValue(fileName);
+                  setIsEditing(true);
+                }}
+              />
+              <DeleteActionIcon
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onChange("delete", "file", {
+                    path: directory.webcontainerPath,
+                    key,
+                  });
+                }}
+              />
+            </div>
+          </div>
         )}
       </div>
       {isDirectory && (
-        <ul className="pl-2">
+        <ul className="pl-4">
           {showChildren && (
             <Tree
               data={value.directory}
               onBlur={onBlur}
+              onChange={onChange}
               onClick={onClick}
-              directory={dir}
-              currentDirectory={currentDirectory}
-              setCurrentDirectory={setCurrentDirectory}
+              directory={{ path, webcontainerPath }}
             />
           )}
         </ul>
@@ -94,11 +192,14 @@ const TreeNode: FC<TreeNodeProps> = ({
 
 interface TreeNodeProps {
   node: [string, DirectoryNode | FileNode];
-  onBlur(value: string, type: FileSystemType): void;
-  onClick(code: string, dir: string): void;
-  setCurrentDirectory(directory: string): void;
-  directory: string;
-  currentDirectory: string;
+  onBlur(action: "create" | "rename", payload: FileSystemPayload): void;
+  onChange(
+    action: FileSystemAction,
+    type: FileSystemType,
+    payload: FileSystemOnChangePayload
+  ): void;
+  onClick(code: string, path: { path: string; webcontainerPath: string }): void;
+  directory: { path: string; webcontainerPath: string };
 }
 
 export default TreeNode;

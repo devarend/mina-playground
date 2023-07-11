@@ -1,47 +1,47 @@
 import { FC } from "react";
 import { useAppSelector } from "@/hooks/useAppSelector";
-import { selectIsRunning } from "@/features/webcontainer/webcontainerSlice";
+import {
+  selectIsAborting,
+  selectIsRunning,
+} from "@/features/webcontainer/webcontainerSlice";
 
-const TestSection: FC<TestSectionProps> = ({
-  isAborting,
-  abortTest,
-  runTest,
+const RunScriptButton: FC<RunScriptButtonProps> = ({
+  runTitle,
+  abortTitle,
+  onAbort,
+  onRun,
+  disabled = false,
 }) => {
   const isRunning = useAppSelector(selectIsRunning);
+  const isAborting = useAppSelector(selectIsAborting);
 
-  const onClick = isRunning ? abortTest : runTest;
+  const onClick = isRunning ? onAbort : onRun;
   const { style, title } = isRunning
-    ? { style: "from-red-400 via-red-500 to-red-600", title: "Abort tests" }
+    ? { style: "from-red-400 via-red-500 to-red-600", title: abortTitle }
     : {
         style: "from-green-400 via-green-500 to-green-600",
-        title: "Run tests",
+        title: runTitle,
       };
   return (
-    <>
-      <button
-        type="button"
-        onClick={onClick}
-        className={`inline-flex w-36 text-white bg-gradient-to-r ${style}
+    <button
+      disabled={disabled}
+      type="button"
+      onClick={onClick}
+      className={`inline-flex w-36 text-white bg-gradient-to-r ${style} disabled:opacity-50 disabled:pointer-events-none
+
         } hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center`}
-      >
-        {isRunning || isAborting ? (
-          isAborting ? (
-            <AbortSpinner />
-          ) : (
-            <AbortSquare />
-          )
+    >
+      {isRunning || isAborting ? (
+        isAborting ? (
+          <AbortSpinner />
         ) : (
-          <RunIcon />
-        )}
-        {title}
-      </button>
-      <div className="inline-flex pl-2">
-        <span>or</span>
-        <span className="bg-green-100 text-green-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded">
-          CTRL + S
-        </span>
-      </div>
-    </>
+          <AbortSquare />
+        )
+      ) : (
+        <RunIcon />
+      )}
+      {title}
+    </button>
   );
 };
 
@@ -90,10 +90,14 @@ const RunIcon = () => (
   </svg>
 );
 
-interface TestSectionProps {
-  isAborting: boolean;
-  abortTest(): void;
-  runTest(): void;
+interface RunScriptButtonProps {
+  runTitle: string;
+  abortTitle: string;
+  disabled?: boolean;
+
+  onAbort(): void;
+
+  onRun(): void;
 }
 
-export default TestSection;
+export default RunScriptButton;

@@ -121,7 +121,7 @@ const Home: NextPage<IHomeProps> = ({ c, s, item }) => {
     if (!code) return;
     setCode(code);
     webcontainerInstance.current?.fs.writeFile(
-      `/src/${dir ?? currentDirectory}`,
+      `/src/${dir ?? currentDirectory}`.replaceAll(/\*/g, "."),
       code
     );
   };
