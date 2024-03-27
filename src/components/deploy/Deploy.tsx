@@ -8,7 +8,6 @@ export const Deploy: FC<DeployProps> = ({ results, path }) => {
   return (
     <>
       <button
-        disabled={true}
         onClick={() => setIsModalVisible(true)}
         type="button"
         className="text-gray-200 hover:text-white hover:bg-black focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center mr-2 inline-flex items-center disabled:opacity-50 disabled:pointer-events-none

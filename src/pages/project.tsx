@@ -1,27 +1,36 @@
 import Head from "next/head";
 import Header from "@/components/Header";
 import { NextPage } from "next";
-import { FormEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { useCreateProjectMutation } from "@/services/project";
+import Button from "@/components/button/Button";
 
 const Project: NextPage = () => {
   const [name, setName] = useState("");
+  const [repositoryUrl, setRepositoryUrl] = useState("");
   const router = useRouter();
   const [createProject] = useCreateProjectMutation();
   const [isLoading, setIsLoading] = useState(false);
+  const [cloneRepositoryLoading, setCloneRepositoryLoading] = useState(false);
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async () => {
     setIsLoading(true);
     const body = { name, type: 0, visibility: true, files_id: 1 };
     try {
       const response = await createProject({ body }).unwrap();
-      // @ts-ignore
       router.push(`/project/${response.project_id}`);
     } catch {
       setIsLoading(false);
     }
+  };
+
+  const onCloneRepository = async () => {
+    const repositoryParts = repositoryUrl.split("github.com/");
+    const usernameRepository = repositoryParts[repositoryParts.length - 1];
+    setCloneRepositoryLoading(true);
+    await router.push(`/github/${usernameRepository}`);
+    setCloneRepositoryLoading(false);
   };
 
   return (
@@ -34,13 +43,13 @@ const Project: NextPage = () => {
       </Head>
       <main>
         <Header />
-        <section className="">
-          <div className="flex justify-center m-4 sm:m-8">
-            <div className="w-full lg:max-w-xl p-6 space-y-8 sm:p-8 bg-[#252728] rounded-lg shadow-2xl">
+        <section>
+          <div className="flex justify-center m-4 sm:m-4">
+            <div className="w-full lg:max-w-xl p-6 space-y-4 sm:p-8 bg-primary rounded-lg shadow-2xl">
               <h2 className="text-2xl font-bold text-gray-200">
                 Create a new project
               </h2>
-              <form onSubmit={onSubmit} className="mt-8 space-y-6">
+              <div className="mt-8 space-y-6">
                 <div>
                   <label
                     htmlFor="name"
@@ -50,23 +59,45 @@ const Project: NextPage = () => {
                   </label>
                   <input
                     type="text"
-                    name="name"
-                    id="name"
+                    placeholder="My project"
                     value={name}
                     onChange={(evt) => setName(evt.target.value)}
-                    className="bg-[#252728] border border-gray-500 text-gray-100 text-sm rounded-lg block w-full p-2.5"
-                    placeholder="My project"
+                    className="input input-bordered w-full text-gray-200"
                     required
                   />
                 </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full px-5 py-3 text-base font-medium text-center text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:ring-blue-300 sm:w-auto"
+                <Button isLoading={isLoading} onClick={onSubmit}>
+                  Create project
+                </Button>
+              </div>
+              <div className="divider text-gray-200">OR</div>
+              <h2 className="text-2xl font-bold text-gray-200">
+                Clone a repository
+              </h2>
+              <div className="mt-8 space-y-6">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block mb-2 text-sm font-medium text-gray-200"
+                  >
+                    GitHub repository URL
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://github.com/username/repository"
+                    value={repositoryUrl}
+                    onChange={(evt) => setRepositoryUrl(evt.target.value)}
+                    className="input input-bordered w-full text-gray-200"
+                    required
+                  />
+                </div>
+                <Button
+                  isLoading={cloneRepositoryLoading}
+                  onClick={onCloneRepository}
                 >
-                  {isLoading ? "Loading..." : "Create project"}
-                </button>
-              </form>
+                  Clone repository
+                </Button>
+              </div>
             </div>
           </div>
         </section>

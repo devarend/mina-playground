@@ -22,8 +22,9 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb";
 import examplesPath from "@/examplePaths.json";
 import examples from "@/examples.json";
 import { normalizePath } from "@/utils/fileSystemWeb";
-import TerminalPreview from "@/features/examples/TerminalPreview";
 import { constructInstallCommand } from "@/utils/jsh";
+import { mapTypeToCustomComponent } from "@/mappers/mapTypeToCustomComponent";
+import TerminalPreview from "@/features/examples/TerminalPreview";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   return examplesPath;
@@ -64,8 +65,11 @@ const Home: NextPage<IHomeProps> = ({ c, s, item }) => {
     base,
     command,
     type,
+    initTerminal,
   } = item;
+
   const [currentFile, setCurrentFile] = useState(highlightedItem);
+  const Component = mapTypeToCustomComponent(type, currentFile.highlightedCode);
 
   const iszkApp = type === "playground-zkApp";
   const hasPackageJSON = !iszkApp;
@@ -101,7 +105,9 @@ const Home: NextPage<IHomeProps> = ({ c, s, item }) => {
 
   useEffect(() => {
     if (initializingWebcontainer) return;
-    dispatch(initializeTerminal({ installDirectories }));
+    if (initTerminal) {
+      dispatch(initializeTerminal({ installDirectories }));
+    }
     // apply changed code after WebContainer has been initialized
     onCodeChange(currentFile.highlightedCode);
     webcontainerInstance?.fs.writeFile(
@@ -181,7 +187,13 @@ const Home: NextPage<IHomeProps> = ({ c, s, item }) => {
               onBlur={onBlur}
             />
           </div>
-          <TerminalPreview onRunCommand={command} shouldShowPreview={iszkApp} />
+          {initTerminal && (
+            <TerminalPreview
+              onRunCommand={command}
+              shouldShowPreview={iszkApp}
+            />
+          )}
+          {Component}
         </div>
       </main>
     </>

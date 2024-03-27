@@ -17,46 +17,75 @@ import TerminalPreview from "@/features/examples/TerminalPreview";
 import { GetServerSideProps } from "next";
 import axios from "axios";
 import CreateSnippet from "@/features/snippet/CreateSnippet";
+import SelectList from "@/components/select/SelectList";
+import { useRouter } from "next/router";
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { snippet } = query;
+  const { snippet, type } = query;
   try {
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/snippet/${snippet}`
     );
     const { data } = response;
     return {
-      props: { data },
+      props: { data, type },
     };
   } catch {
     return {
-      props: { data: null },
+      props: { data: null, type: null },
     };
   }
 };
 
-const Home: NextPage<IHomeProps> = ({ data }) => {
+type SnippetType = "smart-contract" | "zk-app";
+
+const getTypeData = (type: SnippetType, code: string) => {
+  const items = {
+    "smart-contract": {
+      file: { src: { directory: { "main.ts": { file: { contents: code } } } } },
+    },
+    "zk-app": {
+      file: {
+        ui: {
+          directory: {
+            src: {
+              directory: {
+                pages: {
+                  directory: { "index.tsx": { file: { contents: code } } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  return items[type];
+};
+
+const Home: NextPage<IHomeProps> = ({ data, type }) => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { snippet } = router.query;
   const webcontainerInstance = useAppSelector(selectWebcontainerInstance);
   const webcontainerStarted = useAppSelector(selectWebcontainerStarted);
   const initializingWebcontainer = useAppSelector(selectInitializingEsbuild);
-  const { name, code: snippetCode } = data;
+  const { name, code: snippetCode, type: itemType } = data;
   const [code, setCode] = useState(snippetCode);
+  const [snippetType, setSnippetType] = useState<SnippetType>(
+    type || "smart-contract"
+  );
 
-  const snippetFile = {
-    src: { directory: { "main.ts": { file: { contents: code } } } },
-  };
+  const { file } = getTypeData(snippetType, code);
 
   const mount = async () => {
     if (!webcontainerInstance) return;
-    await webcontainerInstance.mount(snippetFile);
+    await webcontainerInstance.mount(file);
   };
 
   useEffect(() => {
     if (!webcontainerStarted) {
-      dispatch(
-        installDependencies({ base: "smart-contract", isExamples: true })
-      );
+      dispatch(installDependencies({ base: snippetType, isExamples: true }));
       return;
     }
   }, [webcontainerStarted]);
@@ -90,11 +119,22 @@ const Home: NextPage<IHomeProps> = ({ data }) => {
         <div className="flex flex-1 grid lg:grid-cols-2">
           <div className="flex flex-col">
             <CreateSnippet code={code} />
+            <SelectList
+              value={snippetType}
+              title={"Choose a type"}
+              items={["smart-contract", "zk-app"]}
+              onChange={(event) =>
+                router.push({
+                  pathname: `/snippet/${snippet}`,
+                  query: { type: event.target.value },
+                })
+              }
+            />
             <CodeEditor code={code} setCodeChange={onCodeChange} />
           </div>
           <TerminalPreview
             onRunCommand={"npm run build && node build/src/main.js"}
-            shouldShowPreview={false}
+            shouldShowPreview={snippetType === "zk-app"}
           />
         </div>
       </main>
@@ -104,6 +144,7 @@ const Home: NextPage<IHomeProps> = ({ data }) => {
 
 interface IHomeProps {
   data: { name: string; code: string };
+  type: SnippetType | undefined;
 }
 
 export default Home;

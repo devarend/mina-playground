@@ -1,7 +1,7 @@
 import { ChangeEvent, FC } from "react";
 import { isArray } from "lodash";
 
-const SelectList: FC<SelectListProps> = ({ title, items, onChange }) => {
+const SelectList: FC<SelectListProps> = ({ title, items, value, onChange }) => {
   if (!items) return null;
 
   const selectItems = isArray(items)
@@ -18,6 +18,7 @@ const SelectList: FC<SelectListProps> = ({ title, items, onChange }) => {
   return (
     <div className="py-2.5">
       <select
+        value={value}
         onChange={onChange}
         className="h-10 w-full bg-gray-700 rounded border-r-8 border-transparent px-4 text-sm"
       >
@@ -31,6 +32,7 @@ const SelectList: FC<SelectListProps> = ({ title, items, onChange }) => {
 interface SelectListProps {
   title: string;
   items: string[] | Record<string, any>;
+  value?: string;
   onChange(event: ChangeEvent<HTMLSelectElement>): void;
 }
 

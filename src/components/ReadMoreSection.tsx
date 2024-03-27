@@ -1,5 +1,6 @@
 import { FC } from "react";
 import Link from "next/link";
+import SectionItem from "@/components/section/SectionItem";
 
 const ReadMoreSection: FC = () => {
   return (
@@ -50,183 +51,35 @@ const ReadMoreSection: FC = () => {
           </Link>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="shadow-2xl bg-[#252728] rounded-lg p-8 md:p-12">
-            <div className="bg-gradient-to-br from-pink-500 to-orange-400 text-white text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-              <svg
-                className="w-3 h-3 mr-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  clipRule="evenodd"
-                  fillRule="evenodd"
-                  d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
-                />
-              </svg>
-              Playground
-            </div>
-            <h2 className="text-gray-200 text-3xl font-extrabold mb-2">
-              Run Smart Contract and zkApp examples
-            </h2>
-            <p className="text-lg font-normal text-gray-400 mb-4">
-              Using the playground page you can try out Smart Contract examples
-              and zkApps.
-            </p>
-            <Link href="/playground/01-introduction/01-o1js">
-              <div className="text-white font-medium text-lg inline-flex items-center">
-                Run examples
-                <svg
-                  aria-hidden="true"
-                  className="w-4 h-4 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
-              </div>
-            </Link>
-          </div>
-
-          <div className="shadow-2xl bg-[#252728] rounded-lg p-8 md:p-12">
-            <div className="bg-gradient-to-br from-pink-500 to-orange-400 text-white text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-              <svg
-                className="w-3 h-3 mr-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  clipRule="evenodd"
-                  fillRule="evenodd"
-                  d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z"
-                />
-              </svg>
-              Projects
-            </div>
-            <h2 className="text-gray-200 text-3xl font-extrabold mb-2">
-              Create your own project
-            </h2>
-            <p className="text-lg font-normal text-gray-400 mb-4">
-              Create, test and run Smart Contract projects online.
-            </p>
-            <Link href="/project">
-              <div className="text-white font-medium text-lg inline-flex items-center">
-                Create project
-                <svg
-                  aria-hidden="true"
-                  className="w-4 h-4 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
-              </div>
-            </Link>
-          </div>
-          <div className="shadow-2xl bg-[#252728] rounded-lg p-8 md:p-12">
-            <div className="bg-gradient-to-br from-pink-500 to-orange-400 text-white text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-              <svg
-                className="w-3 h-3 mr-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  clipRule="evenodd"
-                  fillRule="evenodd"
-                  d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
-                />
-              </svg>
-              Snippets
-            </div>
-            <h2 className="text-gray-200 text-3xl font-extrabold mb-2">
-              Create and share a snippet
-            </h2>
-            <p className="text-lg font-normal text-gray-400 mb-4">
-              Create, share and run a Smart Contract code snippet.
-            </p>
-            <Link href="/snippet/create">
-              <div className="text-white font-medium text-lg inline-flex items-center">
-                Create snippet
-                <svg
-                  aria-hidden="true"
-                  className="w-4 h-4 ml-2"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
-              </div>
-            </Link>
-          </div>
-          <div className="shadow-2xl bg-[#252728] rounded-lg p-8 md:p-12">
-            <div className="bg-gradient-to-br from-pink-500 to-orange-400 text-white text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded-md mb-2">
-              <svg
-                className="w-3 h-3 mr-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <path
-                  clipRule="evenodd"
-                  fillRule="evenodd"
-                  d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
-                />
-              </svg>
-              Smart Contracts
-            </div>
-            <h2 className="text-gray-200 text-3xl font-extrabold mb-2">
-              Deploy Smart Contracts in seconds
-            </h2>
-            <p className="text-lg font-normal text-gray-400 mb-4">
-              Deploy Smart Contracts easily and directly using our web
-              interface.
-            </p>
-            <div className="text-white font-medium text-lg inline-flex items-center">
-              Coming soon!
-              <svg
-                aria-hidden="true"
-                className="w-4 h-4 ml-2"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </div>
-          </div>
+          <SectionItem
+            category="Playground"
+            title="Run Smart Contract and zkApp examples"
+            description="Using the playground page you can try out Smart Contract examples
+              and zkApps."
+            ctaText="Run examples"
+            href="/playground/01-introduction/01-o1js"
+          />
+          <SectionItem
+            category="Projects"
+            title="Create your own project"
+            description="Create, test and run Smart Contract projects online."
+            ctaText="Create project"
+            href="/project"
+          />
+          <SectionItem
+            category="Snippets"
+            title="Create and share a snippet"
+            description="Create, share and run a Smart Contract code snippet."
+            ctaText="Create snippet"
+            href="/snippet/create"
+          />
+          <SectionItem
+            category="Smart Contracts"
+            title="Deploy Smart Contracts in seconds"
+            description="Deploy Smart Contracts easily and directly using our web
+              interface."
+            ctaText="Coming soon!"
+          />
         </div>
       </div>
     </section>

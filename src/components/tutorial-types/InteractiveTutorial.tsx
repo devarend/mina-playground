@@ -28,6 +28,8 @@ import * as React from "react";
 import WebcontainerLoader from "@/features/webcontainer/WebcontainerLoader";
 import { useRouter } from "next/router";
 import { event } from "nextjs-google-analytics";
+import { ItemType } from "@/types";
+import { mapTypeToCustomComponent } from "@/mappers/mapTypeToCustomComponent";
 
 const InteractiveTutorial: FC<InteractiveTutorialProps> = ({
   type,
@@ -36,6 +38,7 @@ const InteractiveTutorial: FC<InteractiveTutorialProps> = ({
   focusedFiles,
   highlightedItem,
   base,
+  initTerminal,
 }) => {
   const { highlightedName, highlightedCode } = highlightedItem;
   const [code, setCode] = useState<string | undefined>(highlightedCode);
@@ -51,18 +54,6 @@ const InteractiveTutorial: FC<InteractiveTutorialProps> = ({
   const dispatch = useAppDispatch();
 
   const resetTerminalOutput = () => dispatch(setIsTestPassed(null));
-
-  const { initTerminal, command } =
-    type === "unit"
-      ? {
-          initTerminal: false,
-          command:
-            "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js \r",
-        }
-      : {
-          initTerminal: true,
-          command: "npm run build && node build/src/main.js \r",
-        };
 
   useEffect(() => {
     dispatch(setCurrentTreeItem(highlightedName));
@@ -100,7 +91,9 @@ const InteractiveTutorial: FC<InteractiveTutorialProps> = ({
 
   useEffect(() => {
     if (initializingWebcontainer) return;
-    dispatch(initializeTerminal({}));
+    if (initTerminal) {
+      dispatch(initializeTerminal({}));
+    }
   }, [initializingWebcontainer]);
 
   const onClick = (code: string) => {
@@ -126,7 +119,7 @@ const InteractiveTutorial: FC<InteractiveTutorialProps> = ({
       category: "Interactive tutorials",
       label: `${chapter}-${section}`,
     });
-    dispatch(writeCommand(command));
+    dispatch(writeCommand("npm run build && node build/src/main.js \r"));
   };
 
   return (
@@ -150,26 +143,27 @@ const InteractiveTutorial: FC<InteractiveTutorialProps> = ({
         )}
       </div>
       <div>
-        <div className="p-2">
-          <RunScriptButton
-            onRun={runTest}
-            abortTitle={"Abort"}
-            onAbort={abortTest}
-            runTitle={"Run"}
-          />
-        </div>
-        {initTerminal ? (
-          <div className="terminal h-[150px] md:h-[180px] max-w-[100vw] bg-black" />
-        ) : (
-          <TerminalOutput />
+        {initTerminal && (
+          <>
+            <div className="p-2">
+              <RunScriptButton
+                onRun={runTest}
+                abortTitle={"Abort"}
+                onAbort={abortTest}
+                runTitle={"Run"}
+              />
+            </div>
+            <div className="terminal h-[150px] md:h-[180px] max-w-[100vw] bg-black" />
+          </>
         )}
+        {mapTypeToCustomComponent(type, code)}
       </div>
     </>
   );
 };
 
 interface InteractiveTutorialProps {
-  type: "unit" | "playground";
+  type: ItemType;
   filesArray: string[];
   highlightedItem: {
     highlightedName: string;
@@ -178,6 +172,7 @@ interface InteractiveTutorialProps {
   files: FileSystemTree;
   focusedFiles: FileSystemTree;
   base: string;
+  initTerminal: boolean;
 }
 
 export default InteractiveTutorial;

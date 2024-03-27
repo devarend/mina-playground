@@ -26,6 +26,7 @@ interface WebcontainerState {
   } | null;
   serverUrl: string | null;
   base: string | null;
+  privateKey: string | null;
 }
 
 const initialState: WebcontainerState = {
@@ -44,6 +45,7 @@ const initialState: WebcontainerState = {
   shellProcess: null,
   base: null,
   terminalInitialized: false,
+  privateKey: null,
 };
 
 const jshRC: string = `
@@ -262,7 +264,7 @@ export const initializeShellProcess = createAsyncThunk(
 export const deploySmartContract = createAsyncThunk(
   "deploySmartContract",
   async (
-    { path, feePayerKey }: { path: string; feePayerKey: string },
+    { path, feePayerKey }: { path: string; feePayerKey?: string },
     { getState, dispatch }
   ) => {
     dispatch(setIsDeploying(true));
@@ -283,7 +285,7 @@ export const deploySmartContract = createAsyncThunk(
       "--className",
       "Add",
       "--feePayerKey",
-      feePayerKey,
+      feePayerKey || (webcontainer.privateKey as string),
     ]);
 
     process2?.output.pipeTo(
@@ -350,6 +352,9 @@ export const webcontainerSlice = createSlice({
     },
     setTerminalInitialized: (state, action: PayloadAction<boolean>) => {
       state.terminalInitialized = action.payload;
+    },
+    setPrivateKey: (state, action: PayloadAction<string>) => {
+      state.privateKey = action.payload;
     },
   },
   extraReducers(builder) {
@@ -431,5 +436,6 @@ export const {
   setServerUrl,
   reset,
   setTerminalInitialized,
+  setPrivateKey,
 } = webcontainerSlice.actions;
 export default webcontainerSlice.reducer;

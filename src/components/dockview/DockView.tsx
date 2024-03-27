@@ -18,13 +18,13 @@ import SectionItem from "@/components/section/SectionItem";
 import DependencyManagerLoader from "@/features/project/DependencyManagerLoader";
 import ProjectTerminal from "@/components/terminal/ProjectTerminal";
 
-const GetStarted = () => {
-  return (
-    <Section>
-      <SectionItem />
-    </Section>
-  );
-};
+// const GetStarted = () => {
+//   return (
+//     <Section>
+//       <SectionItem />
+//     </Section>
+//   );
+// };
 
 const DockView = ({ id, name }: { id: string; name: string }) => {
   const onReady = (event: GridviewReadyEvent) => {

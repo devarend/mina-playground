@@ -13,6 +13,10 @@ const dir = process.cwd();
 const projectDir = readdirSync(`${dir}/examples`);
 const baseDir = readdirSync(`${dir}/examples/bases`);
 
+const defaultOptions = {
+    initTerminal: true
+}
+
 for (const item of baseDir) {
     const {files: baseFiles} = transformToWebcontainerFiles(
         `${dir}/examples/bases/${item}`
@@ -40,7 +44,8 @@ for (const item of projectDir) {
     for (const section of sections) {
         if (excludedFiles.includes(section)) continue
         const {name, type, options} = json(`${dir}/examples/${item}/${section}/meta.json`)
-        const response = await getFiles(item, section, options)
+        const currentOptions = {...defaultOptions, ...options}
+        const response = await getFiles(item, section, currentOptions)
 
         const jsonData = {
             type,

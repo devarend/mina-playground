@@ -12,8 +12,8 @@ import { KeyIcon } from "@/icons/DeployIcons";
 import SelectList from "@/components/select/SelectList";
 import { Remote, wrap } from "comlink";
 import { normalizePath } from "@/utils/fileSystemWeb";
-
-interface SnarkyWorker {
+import { Faucet } from "@/features/deploy/Faucet";
+interface o1jsWorker {
   generateKeys(
     customKeyValue: string | undefined
   ): Promise<{ publicKey: string; privateKey: string }>;
@@ -28,12 +28,21 @@ const DeployModal: FC<DeployModalProps> = ({
   const isDeploying = useAppSelector(selectIsDeploying);
   const deploymentMessage = useAppSelector(selectDeploymentMessage);
   const dispatch = useAppDispatch();
-  const [keys, setKeys] = useState({ publicKey: "", privateKey: "" });
-  const snarkyWorker = useRef<any>();
-  const generate = useRef<SnarkyWorker>();
+  const [keys, setKeys] = useState<{
+    publicKey: string;
+    privateKey: string;
+    isValid: boolean | null;
+  }>({
+    publicKey: "",
+    privateKey: "",
+    isValid: null,
+  });
+  const [isInitializing, setIsInitializing] = useState(false);
+  const webWorker = useRef<any>();
+  const generate = useRef<o1jsWorker>();
 
   useEffect(() => {
-    return () => snarkyWorker.current?.terminate();
+    return () => webWorker.current?.terminate();
   }, []);
 
   const deployProject = async () => {
@@ -47,25 +56,35 @@ const DeployModal: FC<DeployModalProps> = ({
   };
 
   const generateKeys = async (customKeyValue?: string) => {
-    if (!snarkyWorker.current) {
-      snarkyWorker.current = new Worker(
+    if (customKeyValue === "") {
+      setKeys({ ...keys, privateKey: "", isValid: false });
+      return;
+    }
+    if (!webWorker.current) {
+      setIsInitializing(true);
+      webWorker.current = new Worker(
         new URL("../../webworkers/worker.ts", import.meta.url)
       );
-      generate.current = wrap<SnarkyWorker>(snarkyWorker.current);
+      const workerReady = () =>
+        new Promise<void>(
+          (resolve) =>
+            (webWorker.current.onmessage = (e) =>
+              e.data === "isReady" && resolve())
+        );
+      await workerReady();
+      generate.current = wrap<o1jsWorker>(webWorker.current);
     }
     const workerFunctions = generate.current;
     if (!workerFunctions) return;
-    const { publicKey, privateKey } = await workerFunctions.generateKeys(
-      customKeyValue
-    );
-    setKeys({ publicKey, privateKey });
-  };
-
-  const onFaucetClick = () => {
-    window.open(
-      `https://faucet.minaprotocol.com/?address=${keys.publicKey}`,
-      "_blank"
-    );
+    try {
+      const { publicKey, privateKey } = await workerFunctions.generateKeys(
+        customKeyValue
+      );
+      setKeys({ publicKey, privateKey, isValid: true });
+    } catch (e) {
+      setKeys({ ...keys, privateKey: customKeyValue || "", isValid: false });
+    }
+    setIsInitializing(false);
   };
 
   return (
@@ -84,40 +103,14 @@ const DeployModal: FC<DeployModalProps> = ({
           items={results.map((item) => item[1])}
           onChange={() => null}
         />
-        {keys.privateKey && (
-          <div className="alert mb-2 bg-gray-300 text-black">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="stroke-current shrink-0 w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="text-sm">
-              Make sure to use the faucet if your address does not have any
-              funds
-            </span>
-            <div>
-              <button
-                onClick={onFaucetClick}
-                className="btn btn-sm btn-primary"
-              >
-                Faucet
-              </button>
-            </div>
-          </div>
+        {keys.privateKey && keys.isValid && (
+          <Faucet publicKey={keys.publicKey} />
         )}
         <div>
           <label htmlFor="hs-trailing-button-add-on" className="sr-only">
             Label
           </label>
-          <div className="flex rounded-md shadow-sm">
+          <div className="flex rounded-md shadow-sm gap-2">
             <input
               value={keys.privateKey}
               onChange={(evt) => generateKeys(evt.target.value)}
@@ -127,10 +120,10 @@ const DeployModal: FC<DeployModalProps> = ({
               placeholder="Fee payer private key"
               className="py-3 px-4 block w-full bg-gray-700 shadow-sm rounded-l-md text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500"
             />
-            <button
+            <Button
+              isLoading={isInitializing}
               onClick={() => generateKeys()}
-              type="button"
-              className="py-3 px-4 inline-flex flex-shrink-0 justify-center items-center gap-2 rounded-r-md border font-semibold border-none bg-gray-500 text-white hover:bg-gray-600 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+              className="bg-gray-500 text-white hover:bg-gray-600"
             >
               <svg
                 className="w-4 h-4"
@@ -143,8 +136,13 @@ const DeployModal: FC<DeployModalProps> = ({
                 />
               </svg>
               Generate
-            </button>
+            </Button>
           </div>
+          {keys.isValid === false && (
+            <span className="text-red-500">
+              Please use a correct private key
+            </span>
+          )}
         </div>
         <div className="modal-action">
           <Button

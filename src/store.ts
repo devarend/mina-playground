@@ -7,6 +7,7 @@ import fileTreeReducer from "@/features/fileTree/fileTreeSlice";
 import dockViewReducer from "@/features/dockView/dockViewSlice";
 import { versionControlApi } from "@/services/versionControl";
 import { snippetApi } from "@/services/snippet";
+import { minaPlaygroundApi } from "@/services/minaPlayground";
 
 export const store = configureStore({
   reducer: {
@@ -17,13 +18,15 @@ export const store = configureStore({
     [projectApi.reducerPath]: projectApi.reducer,
     [versionControlApi.reducerPath]: versionControlApi.reducer,
     [snippetApi.reducerPath]: snippetApi.reducer,
+    [minaPlaygroundApi.reducerPath]: minaPlaygroundApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }).concat(
       fileTreeApi.middleware,
       projectApi.middleware,
       versionControlApi.middleware,
-      snippetApi.middleware
+      snippetApi.middleware,
+      minaPlaygroundApi.middleware
     ),
 });
 

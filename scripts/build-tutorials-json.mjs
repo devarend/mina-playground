@@ -7,6 +7,10 @@ import {json} from "./build/fileSystem.mjs";
 const excludedFiles = ["meta.json"];
 const excludedDirectories = ["bases"]
 
+const defaultOptions = {
+  initTerminal: true
+}
+
 let data = {};
 const tutorialPaths = []
 const dir = process.cwd();
@@ -15,7 +19,7 @@ const baseDir = readdirSync(`${dir}/tutorials/bases`);
 
 const mapTypeToResponse = async (type, c, s, options) => {
   switch (type) {
-    case "unit":
+    case "deploy":
     case "playground":
       return await getTutorialAndFiles(c, s, options);
   }
@@ -48,7 +52,8 @@ for (const item of projectDir) {
   for (const section of sections) {
     if (excludedFiles.includes(section)) continue
     const {name, type, options} = json(`${dir}/tutorials/${item}/${section}/meta.json`)
-    const response = await mapTypeToResponse(type, item, section, options)
+    const currentOptions = {...defaultOptions, ...options}
+    const response = await mapTypeToResponse(type, item, section, currentOptions)
 
     const jsonData = {
       type,
